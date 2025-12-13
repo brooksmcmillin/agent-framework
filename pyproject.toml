@@ -9,11 +9,6 @@ authors = [
 readme = "README.md"
 license = {text = "MIT"}
 keywords = ["llm", "agent", "mcp", "anthropic", "claude"]
-
-[project.urls]
-Homepage = "https://github.com/brooksmcmillin/agent-framework"
-Repository = "https://github.com/brooksmcmillin/agent-framework"
-Issues = "https://github.com/brooksmcmillin/agent-framework/issues"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -23,6 +18,11 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
 ]
+
+[project.urls]
+Homepage = "https://github.com/brooksmcmillin/agent-framework"
+Repository = "https://github.com/brooksmcmillin/agent-framework"
+Issues = "https://github.com/brooksmcmillin/agent-framework/issues"
 
 dependencies = [
     "anthropic>=0.39.0",
