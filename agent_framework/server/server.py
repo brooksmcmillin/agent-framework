@@ -5,7 +5,8 @@ This module provides utilities for creating MCP servers with tool registration.
 
 import json
 import logging
-from typing import Any, Callable, Sequence
+from collections.abc import Callable, Sequence
+from typing import Any
 
 from mcp.server import Server
 from mcp.server.stdio import stdio_server

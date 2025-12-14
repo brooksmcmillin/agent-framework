@@ -4,14 +4,13 @@ This module manages the connection to the MCP server and provides
 a clean interface for calling MCP tools.
 """
 
-import logging
 import json
-from typing import Any
+import logging
 from contextlib import asynccontextmanager
+from typing import Any
 
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
-
 
 logger = logging.getLogger(__name__)
 

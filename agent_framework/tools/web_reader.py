@@ -7,9 +7,9 @@ Useful for reading articles, blog posts, documentation, and other web content.
 import logging
 from typing import Any
 
+import html2text
 import httpx
 from bs4 import BeautifulSoup
-import html2text
 
 logger = logging.getLogger(__name__)
 

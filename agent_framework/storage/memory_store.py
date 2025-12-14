@@ -12,7 +12,6 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -84,7 +83,7 @@ class MemoryStore:
             return
 
         try:
-            with open(self.memory_file, "r") as f:
+            with open(self.memory_file) as f:
                 data = json.load(f)
                 for key, mem_data in data.items():
                     self.memories[key] = Memory.from_dict(mem_data)
