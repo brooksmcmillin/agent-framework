@@ -70,7 +70,9 @@ class TokenStore:
                 self.cipher = Fernet(encryption_key.encode())
                 logger.info("Token encryption enabled")
             except Exception as e:
-                logger.warning(f"Failed to initialize encryption: {e}. Tokens will be stored unencrypted.")
+                logger.warning(
+                    f"Failed to initialize encryption: {e}. Tokens will be stored unencrypted."
+                )
         else:
             logger.warning("No encryption key provided. Tokens will be stored unencrypted.")
 
@@ -119,12 +121,7 @@ class TokenStore:
             logger.error(f"Failed to retrieve token for {platform}:{user_id}: {e}")
             return None
 
-    def save_token(
-        self,
-        platform: str,
-        token_data: TokenData,
-        user_id: str = "default"
-    ) -> bool:
+    def save_token(self, platform: str, token_data: TokenData, user_id: str = "default") -> bool:
         """
         Save token to storage.
 
