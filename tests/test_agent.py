@@ -249,9 +249,7 @@ class TestAgentProcessMessage:
                 agent.mcp_client = mock_mcp_instance
 
                 # Mock _call_mcp_tool_with_reconnect
-                agent._call_mcp_tool_with_reconnect = AsyncMock(
-                    return_value={"result": "ok"}
-                )
+                agent._call_mcp_tool_with_reconnect = AsyncMock(return_value={"result": "ok"})
 
                 result = await agent.process_message("Run many tools")
 
@@ -264,9 +262,7 @@ class TestAgentProcessMessage:
             with patch("agent_framework.core.agent.MCPClient") as mock_mcp:
                 mock_client = AsyncMock()
                 mock_anthropic.return_value = mock_client
-                mock_client.messages.create = AsyncMock(
-                    side_effect=Exception("API Error")
-                )
+                mock_client.messages.create = AsyncMock(side_effect=Exception("API Error"))
 
                 mock_mcp_instance = MagicMock()
                 mock_mcp.return_value = mock_mcp_instance

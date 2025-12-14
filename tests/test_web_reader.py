@@ -105,7 +105,9 @@ class TestFetchWebContent:
         """Test fetch_web_content truncates content exceeding max_length."""
         # Create content longer than max_length
         long_content = "A" * 60000
-        html_content = f"<html><head><title>Test</title></head><body><main>{long_content}</main></body></html>"
+        html_content = (
+            f"<html><head><title>Test</title></head><body><main>{long_content}</main></body></html>"
+        )
 
         mock_response = MagicMock()
         mock_response.text = html_content
@@ -214,9 +216,7 @@ class TestFetchWebContent:
             mock_client = AsyncMock()
             mock_client_class.return_value.__aenter__.return_value = mock_client
             mock_client_class.return_value.__aexit__.return_value = None
-            mock_client.get = AsyncMock(
-                side_effect=httpx.HTTPError("Connection failed")
-            )
+            mock_client.get = AsyncMock(side_effect=httpx.HTTPError("Connection failed"))
 
             with pytest.raises(ValueError, match="Failed to fetch URL"):
                 await fetch_web_content("https://example.com")

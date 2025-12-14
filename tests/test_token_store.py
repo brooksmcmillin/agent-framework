@@ -126,9 +126,7 @@ class TestTokenStore:
         result = token_store.get_token("nonexistent")
         assert result is None
 
-    def test_save_token_with_user_id(
-        self, token_store: TokenStore, sample_token_data: TokenData
-    ):
+    def test_save_token_with_user_id(self, token_store: TokenStore, sample_token_data: TokenData):
         """Test saving tokens with different user IDs."""
         token_store.save_token("twitter", sample_token_data, user_id="user1")
         token_store.save_token("twitter", sample_token_data, user_id="user2")
@@ -153,9 +151,7 @@ class TestTokenStore:
         result = token_store.delete_token("nonexistent")
         assert result is True
 
-    def test_token_file_permissions(
-        self, token_store: TokenStore, sample_token_data: TokenData
-    ):
+    def test_token_file_permissions(self, token_store: TokenStore, sample_token_data: TokenData):
         """Test that token files have restricted permissions."""
         token_store.save_token("test_platform", sample_token_data)
 

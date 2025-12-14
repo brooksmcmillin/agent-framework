@@ -22,9 +22,7 @@ class TestGetMemoryStore:
 
         monkeypatch.setattr(memory, "_memory_store", None)
 
-        with patch(
-            "agent_framework.tools.memory.MemoryStore"
-        ) as mock_store_class:
+        with patch("agent_framework.tools.memory.MemoryStore") as mock_store_class:
             mock_store = MagicMock()
             mock_store_class.return_value = mock_store
 
@@ -36,9 +34,7 @@ class TestGetMemoryStore:
     def test_get_memory_store_returns_singleton(self, temp_dir: Path):
         """Test get_memory_store returns the same instance."""
 
-        with patch(
-            "agent_framework.tools.memory.MemoryStore"
-        ) as mock_store_class:
+        with patch("agent_framework.tools.memory.MemoryStore") as mock_store_class:
             mock_store = MagicMock()
             mock_store_class.return_value = mock_store
 
@@ -68,9 +64,7 @@ class TestSaveMemory:
         mock_store = MagicMock()
         mock_store.save_memory.return_value = mock_memory
 
-        with patch(
-            "agent_framework.tools.memory.get_memory_store", return_value=mock_store
-        ):
+        with patch("agent_framework.tools.memory.get_memory_store", return_value=mock_store):
             result = await save_memory(
                 key="test_key",
                 value="test_value",
@@ -103,9 +97,7 @@ class TestSaveMemory:
         mock_store = MagicMock()
         mock_store.save_memory.return_value = mock_memory
 
-        with patch(
-            "agent_framework.tools.memory.get_memory_store", return_value=mock_store
-        ):
+        with patch("agent_framework.tools.memory.get_memory_store", return_value=mock_store):
             result = await save_memory(key="new_key", value="value")
 
         assert result["action"] == "created"
@@ -116,9 +108,7 @@ class TestSaveMemory:
         mock_store = MagicMock()
         mock_store.save_memory.side_effect = Exception("Storage error")
 
-        with patch(
-            "agent_framework.tools.memory.get_memory_store", return_value=mock_store
-        ):
+        with patch("agent_framework.tools.memory.get_memory_store", return_value=mock_store):
             result = await save_memory(key="test", value="value")
 
         assert result["status"] == "error"
@@ -143,9 +133,7 @@ class TestGetMemories:
         mock_store = MagicMock()
         mock_store.get_all_memories.return_value = [mock_memory]
 
-        with patch(
-            "agent_framework.tools.memory.get_memory_store", return_value=mock_store
-        ):
+        with patch("agent_framework.tools.memory.get_memory_store", return_value=mock_store):
             result = await get_memories(category="cat1", min_importance=5)
 
         assert result["status"] == "success"
@@ -169,9 +157,7 @@ class TestGetMemories:
         mock_store = MagicMock()
         mock_store.get_all_memories.return_value = mock_memories
 
-        with patch(
-            "agent_framework.tools.memory.get_memory_store", return_value=mock_store
-        ):
+        with patch("agent_framework.tools.memory.get_memory_store", return_value=mock_store):
             result = await get_memories(limit=5)
 
         assert result["count"] == 5
@@ -183,9 +169,7 @@ class TestGetMemories:
         mock_store = MagicMock()
         mock_store.get_all_memories.return_value = []
 
-        with patch(
-            "agent_framework.tools.memory.get_memory_store", return_value=mock_store
-        ):
+        with patch("agent_framework.tools.memory.get_memory_store", return_value=mock_store):
             result = await get_memories()
 
         assert result["status"] == "success"
@@ -198,9 +182,7 @@ class TestGetMemories:
         mock_store = MagicMock()
         mock_store.get_all_memories.side_effect = Exception("Query error")
 
-        with patch(
-            "agent_framework.tools.memory.get_memory_store", return_value=mock_store
-        ):
+        with patch("agent_framework.tools.memory.get_memory_store", return_value=mock_store):
             result = await get_memories()
 
         assert result["status"] == "error"
@@ -226,9 +208,7 @@ class TestSearchMemories:
         mock_store = MagicMock()
         mock_store.search_memories.return_value = [mock_memory]
 
-        with patch(
-            "agent_framework.tools.memory.get_memory_store", return_value=mock_store
-        ):
+        with patch("agent_framework.tools.memory.get_memory_store", return_value=mock_store):
             result = await search_memories(query="email")
 
         assert result["status"] == "success"
@@ -252,9 +232,7 @@ class TestSearchMemories:
         mock_store = MagicMock()
         mock_store.search_memories.return_value = mock_memories
 
-        with patch(
-            "agent_framework.tools.memory.get_memory_store", return_value=mock_store
-        ):
+        with patch("agent_framework.tools.memory.get_memory_store", return_value=mock_store):
             result = await search_memories(query="key", limit=3)
 
         assert result["count"] == 3
@@ -265,9 +243,7 @@ class TestSearchMemories:
         mock_store = MagicMock()
         mock_store.search_memories.return_value = []
 
-        with patch(
-            "agent_framework.tools.memory.get_memory_store", return_value=mock_store
-        ):
+        with patch("agent_framework.tools.memory.get_memory_store", return_value=mock_store):
             result = await search_memories(query="nonexistent")
 
         assert result["status"] == "success"
@@ -279,9 +255,7 @@ class TestSearchMemories:
         mock_store = MagicMock()
         mock_store.search_memories.side_effect = Exception("Search error")
 
-        with patch(
-            "agent_framework.tools.memory.get_memory_store", return_value=mock_store
-        ):
+        with patch("agent_framework.tools.memory.get_memory_store", return_value=mock_store):
             result = await search_memories(query="test")
 
         assert result["status"] == "error"

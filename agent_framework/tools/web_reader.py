@@ -62,7 +62,9 @@ async def fetch_web_content(url: str, max_length: int = 50000) -> dict[str, Any]
         title = title_tag.get_text().strip() if title_tag else "No title"
 
         # Remove unwanted elements
-        for element in soup(["script", "style", "nav", "footer", "header", "aside", "iframe", "noscript"]):
+        for element in soup(
+            ["script", "style", "nav", "footer", "header", "aside", "iframe", "noscript"]
+        ):
             element.decompose()
 
         # Try to find main content area
@@ -93,7 +95,7 @@ async def fetch_web_content(url: str, max_length: int = 50000) -> dict[str, Any]
         markdown_content = h.handle(str(main_content))
 
         # Clean up excessive whitespace
-        lines = markdown_content.split('\n')
+        lines = markdown_content.split("\n")
         cleaned_lines = []
         prev_empty = False
 
@@ -107,11 +109,13 @@ async def fetch_web_content(url: str, max_length: int = 50000) -> dict[str, Any]
 
             prev_empty = is_empty
 
-        markdown_content = '\n'.join(cleaned_lines).strip()
+        markdown_content = "\n".join(cleaned_lines).strip()
 
         # Truncate if too long
         if len(markdown_content) > max_length:
-            markdown_content = markdown_content[:max_length] + "\n\n[Content truncated - exceeded maximum length]"
+            markdown_content = (
+                markdown_content[:max_length] + "\n\n[Content truncated - exceeded maximum length]"
+            )
 
         # Calculate metrics
         word_count = len(markdown_content.split())

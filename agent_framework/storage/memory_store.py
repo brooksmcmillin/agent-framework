@@ -20,10 +20,16 @@ class Memory(BaseModel):
 
     key: str = Field(..., description="Unique identifier for this memory")
     value: str = Field(..., description="The memory content")
-    category: str | None = Field(None, description="Optional category (e.g., 'user_preference', 'fact', 'goal')")
+    category: str | None = Field(
+        None, description="Optional category (e.g., 'user_preference', 'fact', 'goal')"
+    )
     tags: list[str] = Field(default_factory=list, description="Optional tags for filtering")
-    created_at: datetime = Field(default_factory=datetime.utcnow, description="When this memory was created")
-    updated_at: datetime = Field(default_factory=datetime.utcnow, description="When this memory was last updated")
+    created_at: datetime = Field(
+        default_factory=datetime.utcnow, description="When this memory was created"
+    )
+    updated_at: datetime = Field(
+        default_factory=datetime.utcnow, description="When this memory was last updated"
+    )
     importance: int = Field(default=5, description="Importance level 1-10")
 
     def to_dict(self) -> dict[str, Any]:
@@ -207,7 +213,8 @@ class MemoryStore:
         """
         query_lower = query.lower()
         results = [
-            m for m in self.memories.values()
+            m
+            for m in self.memories.values()
             if query_lower in m.key.lower() or query_lower in m.value.lower()
         ]
 
@@ -243,14 +250,8 @@ class MemoryStore:
         return {
             "total_memories": len(self.memories),
             "categories": categories,
-            "oldest_memory": min(
-                (m.created_at for m in self.memories.values()),
-                default=None
-            ),
-            "newest_memory": max(
-                (m.created_at for m in self.memories.values()),
-                default=None
-            ),
+            "oldest_memory": min((m.created_at for m in self.memories.values()), default=None),
+            "newest_memory": max((m.created_at for m in self.memories.values()), default=None),
         }
 
 

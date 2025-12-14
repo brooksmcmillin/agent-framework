@@ -116,14 +116,11 @@ class MCPClient:
             RuntimeError: If session is not initialized
         """
         if not self.session:
-            raise RuntimeError(
-                "MCP session not initialized. Use 'async with client.connect():'"
-            )
+            raise RuntimeError("MCP session not initialized. Use 'async with client.connect():'")
 
         if tool_name not in self.available_tools:
             raise ValueError(
-                f"Unknown tool: {tool_name}. "
-                f"Available tools: {list(self.available_tools.keys())}"
+                f"Unknown tool: {tool_name}. Available tools: {list(self.available_tools.keys())}"
             )
 
         logger.info(f"Calling tool: {tool_name} with arguments: {arguments}")

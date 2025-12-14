@@ -95,7 +95,9 @@ def mock_httpx_response():
     """Create a mock httpx response."""
     mock_response = MagicMock()
     mock_response.status_code = 200
-    mock_response.text = "<html><head><title>Test Page</title></head><body><main>Test content</main></body></html>"
+    mock_response.text = (
+        "<html><head><title>Test Page</title></head><body><main>Test content</main></body></html>"
+    )
     mock_response.url = "https://example.com"
     mock_response.raise_for_status = MagicMock()
     return mock_response

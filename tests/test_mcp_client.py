@@ -118,9 +118,7 @@ class TestMCPClientAsync:
         # Mock auth error response
         mock_result = MagicMock()
         mock_result.content = [
-            MagicMock(
-                text='{"error": "authentication_required", "message": "Please authenticate"}'
-            )
+            MagicMock(text='{"error": "authentication_required", "message": "Please authenticate"}')
         ]
         client.session.call_tool = AsyncMock(return_value=mock_result)
 
@@ -137,9 +135,7 @@ class TestMCPClientAsync:
         # Mock execution error response
         mock_result = MagicMock()
         mock_result.content = [
-            MagicMock(
-                text='{"error": "execution_error", "message": "Something went wrong"}'
-            )
+            MagicMock(text='{"error": "execution_error", "message": "Something went wrong"}')
         ]
         client.session.call_tool = AsyncMock(return_value=mock_result)
 

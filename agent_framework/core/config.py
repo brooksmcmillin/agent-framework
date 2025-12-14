@@ -14,9 +14,7 @@ class Settings(BaseSettings):
     )
 
     # LLM Configuration
-    anthropic_api_key: str | None = Field(
-        default=None, description="Anthropic API key for Claude"
-    )
+    anthropic_api_key: str | None = Field(default=None, description="Anthropic API key for Claude")
 
     # MCP Server Configuration
     mcp_server_host: str = Field(default="localhost", description="MCP server host")

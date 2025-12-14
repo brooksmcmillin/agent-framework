@@ -205,7 +205,9 @@ class TestSendSlackMessage:
         mock_response.raise_for_status = MagicMock()
 
         # Use placeholder path for testing URL sanitization
-        long_webhook = "https://hooks.slack.com/services/TXXXXXXXXXX/BXXXXXXXXXX/xxxxxxxxxxxxxxxxxxxx"
+        long_webhook = (
+            "https://hooks.slack.com/services/TXXXXXXXXXX/BXXXXXXXXXX/xxxxxxxxxxxxxxxxxxxx"
+        )
 
         with patch("httpx.AsyncClient") as mock_client_class:
             mock_client = AsyncMock()

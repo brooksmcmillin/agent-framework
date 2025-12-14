@@ -23,9 +23,7 @@ class TestMCPServerBase:
 
     def test_mcp_server_initialization_with_defaults(self):
         """Test MCPServerBase initialization sets up default tools."""
-        with patch(
-            "agent_framework.server.server.setup_default_tools"
-        ) as mock_setup:
+        with patch("agent_framework.server.server.setup_default_tools") as mock_setup:
             server = MCPServerBase(name="test-server", setup_defaults=True)
             mock_setup.assert_called_once_with(server)
 
