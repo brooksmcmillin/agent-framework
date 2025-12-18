@@ -7,6 +7,8 @@ This module provides the foundational Agent class that handles:
 - Interactive CLI interface
 """
 
+import asyncio
+import json
 import logging
 import os
 from abc import ABC, abstractmethod
@@ -17,6 +19,7 @@ from anthropic.types import MessageParam, TextBlock, ToolUseBlock
 from dotenv import load_dotenv
 
 from .mcp_client import MCPClient
+from .remote_mcp_client import RemoteMCPClient
 
 # Load environment variables
 load_dotenv()
@@ -27,6 +30,10 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
+
+class InvalidToolName(Exception):
+    def __init__(self, message: str):            
+        super().__init__(f"{message} tool not found!")
 
 
 class Agent(ABC):
@@ -50,6 +57,7 @@ class Agent(ABC):
         api_key: str | None = None,
         model: str = "claude-sonnet-4-5-20250929",
         mcp_server_path: str = "mcp_server/server.py",
+        mcp_urls: list[str] | None = None
     ):
         """
         Initialize the agent.
@@ -65,6 +73,8 @@ class Agent(ABC):
 
         self.model = model
         self.mcp_server_path = mcp_server_path
+        self.mcp_urls: list[str] = mcp_urls or []
+        self.tools: dict[str, list[str]] = {}
 
         # Initialize Anthropic client
         self.client = AsyncAnthropic(api_key=self.api_key)
@@ -132,13 +142,48 @@ class Agent(ABC):
         Returns:
             Tool result
         """
-        async with self.mcp_client.connect():
-            return await self.mcp_client.call_tool(tool_name, arguments)
+
+        # Local tools should take precedence over remote tools if there are any name collisions.
+        # TODO: Throw an error if there are name collisions? 
+        if tool_name in self.tools["local"]:
+            async with self.mcp_client.connect():
+                return await self.mcp_client.call_tool(tool_name, arguments)
+
+        for url in self.mcp_urls:
+            async with RemoteMCPClient(url) as mcp:
+                result = await mcp.call_tool(tool_name, arguments)
+
+                # Handle result - could be string or dict
+                if isinstance(result, str):
+                    try:
+                        # Try to parse as JSON
+                        result_dict = json.loads(result)
+                        return result_dict
+                    except json.JSONDecodeError:
+                        return {"result": result}
+                else:
+                    return result
+
+        # If the tool isn't found, raise an exception.
+        raise InvalidToolName(tool_name)
+
 
     async def _get_available_tools(self) -> list[str]:
         """Get list of available MCP tools (reconnects to server)."""
+
+        # Get tools from local MCP server
         async with self.mcp_client.connect():
-            return self.mcp_client.get_available_tools()
+            self.tools["local"] = self.mcp_client.get_available_tools()
+
+        # Get tools from remote MCP server(s) if applicable
+        for url in self.mcp_urls:
+            async with RemoteMCPClient(url) as mcp:
+                mcp_tools = await mcp.list_tools()
+                self.tools[url] = [tool["name"] for tool in mcp_tools]
+
+        # Return the concatenation of all the tool lists
+        return [item for lst in self.tools.values() for item in lst]
+                
 
     async def start(self):
         """Start an interactive session with the agent."""
@@ -161,6 +206,28 @@ class Agent(ABC):
             logger.error(f"Failed to connect to MCP server: {e}")
             print(f"\n⚠️  Warning: Could not connect to MCP server: {e}")
             print("Make sure the MCP server is running and try again.\n")
+
+        # Test remote MCP connection(s)
+        for url in self.mcp_urls:
+            try:
+                print(f"🔌 Connecting to remote MCP server {url}...", flush=True)
+                async with RemoteMCPClient(url) as mcp:
+                    tools = await asyncio.wait_for(mcp.list_tools(), timeout=10.0)
+                    logger.info(f"Connected to MCP server with {len(tools)} tools")
+                    print(f"✅ Connected to {url}")
+                    print(f"✅ Found {len(tools)} tools\n", flush=True)
+            except asyncio.TimeoutError:
+                print(f"❌ Timeout while connecting to MCP server at {url}")
+                print("The connection was established but listing tools timed out.")
+                return
+            except Exception as e:
+                print(f"❌ Failed to connect to MCP server at {url}")
+                print(f"Error: {e}")
+                print("\nPlease ensure:")
+                print("1. The MCP server is running")
+                print("2. The URL is correct")
+                print("3. The server is accessible")
+                return
 
         # Main interaction loop
         while True:
@@ -368,16 +435,28 @@ class Agent(ABC):
         Returns:
             List of tool definitions in Anthropic format
         """
-        anthropic_tools = []
+        anthropic_tools: list[dict[str, str]] = []
 
         # Reconnect to get latest tools
         async with self.mcp_client.connect():
-            for tool_name, tool_info in self.mcp_client.available_tools.items():
+            for _, tool_info in self.mcp_client.available_tools.items():
                 anthropic_tools.append({
                     "name": tool_info.name,
                     "description": tool_info.description,
                     "input_schema": tool_info.inputSchema,
                 })
+
+        # Get remote MCP Server tools
+        for url in self.mcp_urls:
+            async with RemoteMCPClient(url) as mcp:
+                mcp_tools = await mcp.list_tools()
+
+                # Convert to Anthropic format
+                anthropic_tools += [{
+                    "name": tool["name"],
+                    "description": tool["description"],
+                    "input_schema": tool["input_schema"]
+                } for tool in mcp_tools]
 
         return anthropic_tools
 
