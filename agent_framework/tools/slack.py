@@ -60,9 +60,7 @@ async def send_slack_message(
             )
 
     if not webhook_url.startswith("https://hooks.slack.com/"):
-        raise ValueError(
-            "Invalid Slack webhook URL. Must start with 'https://hooks.slack.com/'"
-        )
+        raise ValueError("Invalid Slack webhook URL. Must start with 'https://hooks.slack.com/'")
 
     if not text:
         raise ValueError("text is required")

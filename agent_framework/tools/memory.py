@@ -9,7 +9,6 @@ from typing import Any
 
 from ..storage.memory_store import MemoryStore
 
-
 logger = logging.getLogger(__name__)
 
 # Global memory store instance

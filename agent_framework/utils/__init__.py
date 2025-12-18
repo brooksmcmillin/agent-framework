@@ -2,9 +2,9 @@
 
 from .errors import (
     AgentError,
-    ValidationError,
     AuthenticationError,
     ToolExecutionError,
+    ValidationError,
 )
 
 __all__ = [

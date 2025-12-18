@@ -288,10 +288,12 @@ class Agent(ABC):
             The agent's response as a string
         """
         # Add user message to conversation history
-        self.messages.append({
-            "role": "user",
-            "content": user_message,
-        })
+        self.messages.append(
+            {
+                "role": "user",
+                "content": user_message,
+            }
+        )
 
         # Convert MCP tools to Anthropic tool format (reconnects to get latest)
         tools = await self._convert_mcp_tools_to_anthropic()
@@ -329,35 +331,39 @@ class Agent(ABC):
                     text_response = self._extract_text_from_response(response.content)
 
                     # Add assistant response to conversation
-                    self.messages.append({
-                        "role": "assistant",
-                        "content": response.content,
-                    })
+                    self.messages.append(
+                        {
+                            "role": "assistant",
+                            "content": response.content,
+                        }
+                    )
 
                     return text_response
 
                 elif response.stop_reason == "tool_use":
                     # Extract tool calls
                     tool_calls = [
-                        block
-                        for block in response.content
-                        if isinstance(block, ToolUseBlock)
+                        block for block in response.content if isinstance(block, ToolUseBlock)
                     ]
 
                     if not tool_calls:
                         logger.warning("No tool calls found despite tool_use stop reason")
                         text_response = self._extract_text_from_response(response.content)
-                        self.messages.append({
-                            "role": "assistant",
-                            "content": response.content,
-                        })
+                        self.messages.append(
+                            {
+                                "role": "assistant",
+                                "content": response.content,
+                            }
+                        )
                         return text_response
 
                     # Add assistant response to conversation (with tool calls)
-                    self.messages.append({
-                        "role": "assistant",
-                        "content": response.content,
-                    })
+                    self.messages.append(
+                        {
+                            "role": "assistant",
+                            "content": response.content,
+                        }
+                    )
 
                     # Execute tool calls and collect results
                     tool_results = []
@@ -371,39 +377,45 @@ class Agent(ABC):
                                 tool_call.input,
                             )
 
-                            tool_results.append({
-                                "type": "tool_result",
-                                "tool_use_id": tool_call.id,
-                                "content": str(result),
-                            })
+                            tool_results.append(
+                                {
+                                    "type": "tool_result",
+                                    "tool_use_id": tool_call.id,
+                                    "content": str(result),
+                                }
+                            )
 
                         except PermissionError as e:
                             # Handle auth errors
-                            logger.warning(
-                                f"Authentication error for {tool_call.name}: {e}"
+                            logger.warning(f"Authentication error for {tool_call.name}: {e}")
+                            tool_results.append(
+                                {
+                                    "type": "tool_result",
+                                    "tool_use_id": tool_call.id,
+                                    "content": f"Authentication required: {e}",
+                                    "is_error": True,
+                                }
                             )
-                            tool_results.append({
-                                "type": "tool_result",
-                                "tool_use_id": tool_call.id,
-                                "content": f"Authentication required: {e}",
-                                "is_error": True,
-                            })
 
                         except Exception as e:
                             # Handle other tool errors
                             logger.error(f"Tool execution error for {tool_call.name}: {e}")
-                            tool_results.append({
-                                "type": "tool_result",
-                                "tool_use_id": tool_call.id,
-                                "content": f"Tool execution failed: {e}",
-                                "is_error": True,
-                            })
+                            tool_results.append(
+                                {
+                                    "type": "tool_result",
+                                    "tool_use_id": tool_call.id,
+                                    "content": f"Tool execution failed: {e}",
+                                    "is_error": True,
+                                }
+                            )
 
                     # Add tool results to conversation
-                    self.messages.append({
-                        "role": "user",
-                        "content": tool_results,
-                    })
+                    self.messages.append(
+                        {
+                            "role": "user",
+                            "content": tool_results,
+                        }
+                    )
 
                     # Continue loop to get Claude's response to tool results
 
@@ -411,10 +423,12 @@ class Agent(ABC):
                     # Unexpected stop reason
                     logger.warning(f"Unexpected stop reason: {response.stop_reason}")
                     text_response = self._extract_text_from_response(response.content)
-                    self.messages.append({
-                        "role": "assistant",
-                        "content": response.content,
-                    })
+                    self.messages.append(
+                        {
+                            "role": "assistant",
+                            "content": response.content,
+                        }
+                    )
                     return text_response
 
             except Exception as e:
