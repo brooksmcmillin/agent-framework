@@ -6,6 +6,7 @@ for MCP server authentication.
 
 import asyncio
 import hashlib
+import html
 import logging
 import secrets
 import webbrowser
@@ -14,7 +15,6 @@ from urllib.parse import urlencode
 
 import httpx
 from aiohttp import web
-import html
 
 from .oauth_config import OAuthConfig
 from .oauth_tokens import TokenSet

@@ -6,7 +6,6 @@ This module handles storage, retrieval, and refresh of OAuth access tokens.
 import hashlib
 import json
 import logging
-import os
 import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -143,7 +142,7 @@ class TokenStorage:
             return None
 
         try:
-            with open(token_file, "r") as f:
+            with open(token_file) as f:
                 data = json.load(f)
 
             # Verify server URL matches

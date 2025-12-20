@@ -2,11 +2,7 @@
 
 from unittest.mock import patch
 
-from agent_framework.server.server import (
-    MCPServerBase,
-    create_mcp_server,
-    setup_default_tools,
-)
+from agent_framework.server.server import MCPServerBase, create_mcp_server, setup_default_tools
 
 
 class TestMCPServerBase:

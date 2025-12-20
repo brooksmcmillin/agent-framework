@@ -215,7 +215,7 @@ class Agent(ABC):
                     logger.info(f"Connected to MCP server with {len(tools)} tools")
                     print(f"✅ Connected to {url}")
                     print(f"✅ Found {len(tools)} tools\n", flush=True)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 print(f"❌ Timeout while connecting to MCP server at {url}")
                 print("The connection was established but listing tools timed out.")
                 return
