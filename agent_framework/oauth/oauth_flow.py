@@ -14,6 +14,7 @@ from urllib.parse import urlencode
 
 import httpx
 from aiohttp import web
+import html
 
 from .oauth_config import OAuthConfig
 from .oauth_tokens import TokenSet
@@ -202,8 +203,8 @@ class OAuthFlowHandler:
                     <head><title>Authorization Failed</title></head>
                     <body style="font-family: sans-serif; text-align: center; padding: 50px;">
                         <h1 style="color: red;">❌ Authorization Failed</h1>
-                        <p><strong>Error:</strong> {error}</p>
-                        <p>{error_description}</p>
+                        <p><strong>Error:</strong> {html.escape(error)}</p>
+                        <p>{html.escape(error_description)}</p>
                         <p>Please close this window and try again.</p>
                     </body>
                     </html>
