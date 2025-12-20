@@ -80,9 +80,7 @@ async def discover_oauth_config(base_url: str) -> OAuthConfig:
             resource_response.raise_for_status()
             resource_metadata = resource_response.json()
         except httpx.HTTPError as e:
-            raise ValueError(
-                f"Failed to fetch OAuth protected resource metadata: {e}"
-            ) from e
+            raise ValueError(f"Failed to fetch OAuth protected resource metadata: {e}") from e
 
         resource_url = resource_metadata.get("resource")
         if not resource_url:
@@ -113,9 +111,7 @@ async def discover_oauth_config(base_url: str) -> OAuthConfig:
                 auth_response.raise_for_status()
                 auth_metadata = auth_response.json()
             except httpx.HTTPError as e:
-                raise ValueError(
-                    f"Failed to fetch OAuth authorization server metadata: {e}"
-                ) from e
+                raise ValueError(f"Failed to fetch OAuth authorization server metadata: {e}") from e
 
         # Extract required endpoints
         authorization_endpoint = auth_metadata.get("authorization_endpoint")
@@ -137,9 +133,7 @@ async def discover_oauth_config(base_url: str) -> OAuthConfig:
             scopes_supported=auth_metadata.get("scopes_supported"),
             response_types_supported=auth_metadata.get("response_types_supported"),
             grant_types_supported=auth_metadata.get("grant_types_supported"),
-            code_challenge_methods_supported=auth_metadata.get(
-                "code_challenge_methods_supported"
-            ),
+            code_challenge_methods_supported=auth_metadata.get("code_challenge_methods_supported"),
             token_endpoint_auth_methods_supported=auth_metadata.get(
                 "token_endpoint_auth_methods_supported"
             ),

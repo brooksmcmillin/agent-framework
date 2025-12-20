@@ -1,112 +1,85 @@
 # Agent Framework
 
-A reusable LLM agent framework built on the Model Context Protocol (MCP), extracted from production agent implementations.
+A production-ready framework for building LLM agents with the Model Context Protocol (MCP). Build powerful, tool-enabled agents with persistent memory, OAuth integration, and extensible architecture.
 
-## Features
+## Why This Framework?
 
-### Core Agent System
-- **Base Agent Class**: Agentic loop with conversation management
-- **MCP Client**: Connect to MCP servers for tool discovery and execution
-- **Hot Reload**: Update tools without losing conversation context
-- **Token Tracking**: Monitor LLM token usage
+- **Battle-tested**: Extracted from production agent implementations
+- **MCP-native**: Built on the Model Context Protocol for clean tool separation
+- **Batteries included**: Web scraping, memory storage, Slack integration, OAuth handling
+- **Type-safe**: Full typing with Pydantic validation throughout
+- **Extensible**: Clean abstractions for building domain-specific agents
 
-### Storage & Memory
-- **Memory System**: Persistent storage across conversations with categories, tags, and search
-- **Token Store**: Encrypted OAuth token storage with automatic refresh
-- **Pluggable Backends**: Easy migration from file-based to database storage
-
-
-### Generic Tools
-- **Web Reader**: Fetch and convert web content to clean markdown
-- **Slack Integration**: Post messages via incoming webhooks
-- **Memory Tools**: Save, retrieve, and search persistent memories
-
-### MCP Server Infrastructure
-- **Tool Registry**: Clean tool registration and discovery
-- **Error Handling**: Validation, authentication, and execution error categories
-- **JSON Schema**: Type-safe tool definitions
-
-## Installation
+## Quick Install
 
 ```bash
 # Using uv (recommended)
 uv pip install -e .
 
-# Using pip
+# Or with pip
 pip install -e .
 ```
 
-## Quick Start
-
-### Creating an Agent
+## Quick Example
 
 ```python
-from agent_framework.core import Agent
+from agent_framework import Agent
 
 class MyAgent(Agent):
-    """Your custom agent implementation."""
-
     def get_system_prompt(self) -> str:
-        return """You are a helpful assistant that..."""
+        return "You are a helpful assistant that can read web content and remember information."
 
-# Run the agent
-async def main():
-    agent = MyAgent(
-        api_key="your-anthropic-api-key",
-        mcp_server_path="path/to/your/mcp_server.py"
-    )
-    await agent.start()
-
+# Run it
 import asyncio
-asyncio.run(main())
+asyncio.run(MyAgent(mcp_server_path="server.py").start())
 ```
 
-### Creating Custom Tools
+## Core Features
 
-```python
-# In your_tools.py
-async def my_custom_tool(param: str) -> dict[str, Any]:
-    """Your tool implementation."""
-    return {"result": f"Processed: {param}"}
+**Agent System**
+- Agentic conversation loop with CLI interface
+- Local MCP client for stdio-based tool servers
+- Remote MCP client for HTTPS-based servers with OAuth
+- Token usage tracking
 
-# In your MCP server
-from agent_framework.server import create_mcp_server
+**Remote MCP & OAuth**
+- Connect to remote MCP servers over HTTPS
+- Full OAuth 2.0 with PKCE support
+- Automatic OAuth discovery via .well-known endpoints
+- Dynamic client registration
+- Automatic token refresh
 
-app = create_mcp_server("my-agent")
+**Storage & Memory**
+- Persistent memory with categories, tags, and search
+- Encrypted OAuth token storage with auto-refresh
+- File-based with easy database migration path
 
-@app.register_tool(
-    name="my_custom_tool",
-    description="What this tool does",
-    input_schema={
-        "type": "object",
-        "properties": {
-            "param": {"type": "string", "description": "Parameter description"}
-        },
-        "required": ["param"]
-    }
-)
-async def handle_my_tool(arguments: dict) -> dict:
-    return await my_custom_tool(**arguments)
-```
+**Built-in Tools**
+- Web content reader (HTML to markdown)
+- Slack webhooks integration
+- Memory management (save, retrieve, search)
 
-## Architecture
-
-The framework separates concerns into distinct modules:
-
-```
-agent_framework/
-├── core/              # Agent orchestration and MCP client
-├── tools/             # Reusable tools (web, slack, memory)
-├── storage/           # Memory and token storage
-├── server/            # MCP server base classes
-└── utils/             # Logging, errors, config
-```
+**MCP Server Infrastructure**
+- Simple tool registration
+- Structured error handling
+- JSON schema validation
 
 ## Documentation
 
-For more detailed information, see:
-- `QUICKSTART.md` - Step-by-step guide to building your first agent
-- `FRAMEWORK_SUMMARY.md` - Detailed framework overview and design decisions
+- **[Getting Started](GETTING_STARTED.md)** - Installation, configuration, and first agent
+- **[Architecture](ARCHITECTURE.md)** - Design decisions, extension patterns, and advanced topics
+
+## Project Structure
+
+```
+agent_framework/
+├── core/          # Agent base class, local and remote MCP clients
+├── oauth/         # OAuth 2.0 discovery, flow, and token management
+├── tools/         # Reusable tools (web, slack, memory)
+├── storage/       # Memory and token storage backends
+├── server/        # MCP server infrastructure
+└── utils/         # Errors, config, logging
+```
 
 ## License
 

@@ -31,8 +31,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 class InvalidToolName(Exception):
-    def __init__(self, message: str):            
+    def __init__(self, message: str):
         super().__init__(f"{message} tool not found!")
 
 
@@ -57,7 +58,7 @@ class Agent(ABC):
         api_key: str | None = None,
         model: str = "claude-sonnet-4-5-20250929",
         mcp_server_path: str = "mcp_server/server.py",
-        mcp_urls: list[str] | None = None
+        mcp_urls: list[str] | None = None,
     ):
         """
         Initialize the agent.
@@ -144,7 +145,7 @@ class Agent(ABC):
         """
 
         # Local tools should take precedence over remote tools if there are any name collisions.
-        # TODO: Throw an error if there are name collisions? 
+        # TODO: Throw an error if there are name collisions?
         if tool_name in self.tools["local"]:
             async with self.mcp_client.connect():
                 return await self.mcp_client.call_tool(tool_name, arguments)
@@ -167,7 +168,6 @@ class Agent(ABC):
         # If the tool isn't found, raise an exception.
         raise InvalidToolName(tool_name)
 
-
     async def _get_available_tools(self) -> list[str]:
         """Get list of available MCP tools (reconnects to server)."""
 
@@ -183,7 +183,6 @@ class Agent(ABC):
 
         # Return the concatenation of all the tool lists
         return [item for lst in self.tools.values() for item in lst]
-                
 
     async def start(self):
         """Start an interactive session with the agent."""
@@ -454,11 +453,13 @@ class Agent(ABC):
         # Reconnect to get latest tools
         async with self.mcp_client.connect():
             for _, tool_info in self.mcp_client.available_tools.items():
-                anthropic_tools.append({
-                    "name": tool_info.name,
-                    "description": tool_info.description,
-                    "input_schema": tool_info.inputSchema,
-                })
+                anthropic_tools.append(
+                    {
+                        "name": tool_info.name,
+                        "description": tool_info.description,
+                        "input_schema": tool_info.inputSchema,
+                    }
+                )
 
         # Get remote MCP Server tools
         for url in self.mcp_urls:
@@ -466,11 +467,14 @@ class Agent(ABC):
                 mcp_tools = await mcp.list_tools()
 
                 # Convert to Anthropic format
-                anthropic_tools += [{
-                    "name": tool["name"],
-                    "description": tool["description"],
-                    "input_schema": tool["input_schema"]
-                } for tool in mcp_tools]
+                anthropic_tools += [
+                    {
+                        "name": tool["name"],
+                        "description": tool["description"],
+                        "input_schema": tool["input_schema"],
+                    }
+                    for tool in mcp_tools
+                ]
 
         return anthropic_tools
 

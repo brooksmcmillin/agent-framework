@@ -189,9 +189,11 @@ class RemoteMCPClient:
 
             # Create streamable HTTP client connection with auth parameter
             self._streamable_context = streamablehttp_client(self.base_url, auth=auth)
-            self._read_stream, self._write_stream, self._get_session_id = (
-                await self._streamable_context.__aenter__()
-            )
+            (
+                self._read_stream,
+                self._write_stream,
+                self._get_session_id,
+            ) = await self._streamable_context.__aenter__()
 
             # Initialize MCP session
             from mcp import ClientSession
@@ -309,7 +311,9 @@ class RemoteMCPClient:
                 # Try root URL
                 base = self.base_url.rstrip("/")
                 response = await client.get(
-                    f"{base}/health" if not base.endswith("/mcp") else base.replace("/mcp", "/health"),
+                    f"{base}/health"
+                    if not base.endswith("/mcp")
+                    else base.replace("/mcp", "/health"),
                     headers=headers,
                     timeout=5.0,
                 )
