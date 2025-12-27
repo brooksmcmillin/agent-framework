@@ -48,6 +48,7 @@ asyncio.run(MyAgent(mcp_server_path="server.py").start())
 - Automatic OAuth discovery via .well-known endpoints
 - Dynamic client registration
 - Automatic token refresh
+- Auto-reauthentication on 401/403 errors with seamless retry
 
 **Storage & Memory**
 - Persistent memory with categories, tags, and search

@@ -155,7 +155,7 @@ Pydantic-based settings with environment variable support:
 ```python
 class Settings(BaseSettings):
     anthropic_api_key: str
-    model_name: str = "claude-3-5-sonnet-20241022"
+    model_name: str = "claude-sonnet-4-5-20250929"
     max_tokens: int = 4096
     storage_path: Path = Path("./storage")
     # ...
@@ -593,7 +593,7 @@ class DatabaseMemoryStore(MemoryStore):
 ```python
 class Settings(BaseSettings):
     anthropic_api_key: str  # Required
-    model_name: str = "claude-3-5-sonnet-20241022"  # Default
+    model_name: str = "claude-sonnet-4-5-20250929"  # Default
 
     class Config:
         env_file = ".env"
