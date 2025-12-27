@@ -15,7 +15,13 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from anthropic import AsyncAnthropic
-from anthropic.types import MessageParam, TextBlock, ToolUseBlock
+from anthropic.types import (
+    MessageParam,
+    ServerToolUseBlock,
+    TextBlock,
+    ToolUseBlock,
+    WebSearchToolResultBlock,
+)
 from dotenv import load_dotenv
 
 from .mcp_client import MCPClient
@@ -59,6 +65,8 @@ class Agent(ABC):
         model: str = "claude-sonnet-4-5-20250929",
         mcp_server_path: str = "mcp_server/server.py",
         mcp_urls: list[str] | None = None,
+        enable_web_search: bool = False,
+        web_search_config: dict[str, Any] | None = None,
     ):
         """
         Initialize the agent.
@@ -67,6 +75,13 @@ class Agent(ABC):
             api_key: Anthropic API key (defaults to ANTHROPIC_API_KEY env var)
             model: Claude model to use
             mcp_server_path: Path to MCP server script
+            mcp_urls: List of remote MCP server URLs
+            enable_web_search: Enable Claude's built-in web search capability
+            web_search_config: Optional configuration for web search tool:
+                - max_uses: Maximum number of web searches per turn (1-10, default: 5)
+                - allowed_domains: List of domains to restrict searches to
+                - blocked_domains: List of domains to exclude from searches
+                - user_location: Dict with type, city, region, country for localized results
         """
         self.api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
         if not self.api_key:
@@ -75,6 +90,8 @@ class Agent(ABC):
         self.model = model
         self.mcp_server_path = mcp_server_path
         self.mcp_urls: list[str] = mcp_urls or []
+        self.enable_web_search = enable_web_search
+        self.web_search_config = web_search_config or {}
         self.tools: dict[str, list[str]] = {}
 
         # Initialize Anthropic client
@@ -90,7 +107,11 @@ class Agent(ABC):
         self.total_input_tokens = 0
         self.total_output_tokens = 0
 
-        logger.info(f"Initialized {self.get_agent_name()} with model: {model}")
+        web_search_status = "enabled" if enable_web_search else "disabled"
+        logger.info(
+            f"Initialized {self.get_agent_name()} with model: {model}, "
+            f"web search: {web_search_status}"
+        )
 
     @abstractmethod
     def get_system_prompt(self) -> str:
@@ -448,7 +469,13 @@ class Agent(ABC):
         Returns:
             List of tool definitions in Anthropic format
         """
-        anthropic_tools: list[dict[str, str]] = []
+        anthropic_tools: list[dict[str, Any]] = []
+
+        # Add Claude's built-in web search tool if enabled
+        if self.enable_web_search:
+            web_search_tool = self._build_web_search_tool()
+            anthropic_tools.append(web_search_tool)
+            logger.info("Added web search tool to available tools")
 
         # Reconnect to get latest tools
         async with self.mcp_client.connect():
@@ -478,22 +505,76 @@ class Agent(ABC):
 
         return anthropic_tools
 
+    def _build_web_search_tool(self) -> dict[str, Any]:
+        """
+        Build the Claude web search tool configuration.
+
+        Returns:
+            Web search tool definition in Anthropic format
+        """
+        web_search_tool: dict[str, Any] = {
+            "type": "web_search_20250305",
+            "name": "web_search",
+        }
+
+        # Add optional configuration
+        if "max_uses" in self.web_search_config:
+            max_uses = self.web_search_config["max_uses"]
+            if isinstance(max_uses, int) and 1 <= max_uses <= 10:
+                web_search_tool["max_uses"] = max_uses
+
+        if "allowed_domains" in self.web_search_config:
+            domains = self.web_search_config["allowed_domains"]
+            if isinstance(domains, list) and all(isinstance(d, str) for d in domains):
+                web_search_tool["allowed_domains"] = domains
+
+        if "blocked_domains" in self.web_search_config:
+            domains = self.web_search_config["blocked_domains"]
+            if isinstance(domains, list) and all(isinstance(d, str) for d in domains):
+                web_search_tool["blocked_domains"] = domains
+
+        if "user_location" in self.web_search_config:
+            location = self.web_search_config["user_location"]
+            if isinstance(location, dict):
+                web_search_tool["user_location"] = location
+
+        return web_search_tool
+
     def _extract_text_from_response(self, content: list[Any]) -> str:
         """
         Extract text content from Claude's response.
+
+        Handles regular text blocks and web search result blocks.
 
         Args:
             content: Response content blocks
 
         Returns:
-            Concatenated text content
+            Concatenated text content including web search sources
         """
         text_parts = []
+        sources = []
+
         for block in content:
             if isinstance(block, TextBlock):
                 text_parts.append(block.text)
+            elif isinstance(block, WebSearchToolResultBlock):
+                # Handle web search results - extract source citations
+                if hasattr(block, "content") and block.content:
+                    for result_content in block.content:
+                        if hasattr(result_content, "url") and hasattr(result_content, "title"):
+                            sources.append(
+                                f"- [{result_content.title}]({result_content.url})"
+                            )
 
-        return "\n\n".join(text_parts) if text_parts else ""
+        response_text = "\n\n".join(text_parts) if text_parts else ""
+
+        # Append sources if available
+        if sources:
+            unique_sources = list(dict.fromkeys(sources))  # Remove duplicates
+            response_text += "\n\n**Sources:**\n" + "\n".join(unique_sources)
+
+        return response_text
 
     def _print_stats(self):
         """Print token usage statistics."""

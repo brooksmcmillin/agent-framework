@@ -34,12 +34,43 @@ import asyncio
 asyncio.run(MyAgent(mcp_server_path="server.py").start())
 ```
 
+## Web Search Agent
+
+Enable Claude's built-in web search for up-to-date information:
+
+```python
+from agent_framework import Agent
+
+class WebSearchAgent(Agent):
+    def get_system_prompt(self) -> str:
+        return "You are a research assistant with web search capabilities."
+
+# Enable web search with optional configuration
+agent = WebSearchAgent(
+    mcp_server_path="server.py",
+    enable_web_search=True,
+    web_search_config={
+        "max_uses": 5,  # Max searches per response (1-10)
+        "allowed_domains": ["docs.python.org"],  # Optional: restrict to domains
+        "blocked_domains": ["spam.com"],  # Optional: exclude domains
+        "user_location": {  # Optional: for localized results
+            "type": "approximate",
+            "city": "San Francisco",
+            "country": "US",
+        },
+    },
+)
+
+asyncio.run(agent.start())
+```
+
 ## Core Features
 
 **Agent System**
 - Agentic conversation loop with CLI interface
 - Local MCP client for stdio-based tool servers
 - Remote MCP client for HTTPS-based servers with OAuth
+- Claude's built-in web search capability
 - Token usage tracking
 
 **Remote MCP & OAuth**
@@ -55,6 +86,7 @@ asyncio.run(MyAgent(mcp_server_path="server.py").start())
 - File-based with easy database migration path
 
 **Built-in Tools**
+- Web search (Claude's native web search)
 - Web content reader (HTML to markdown)
 - Slack webhooks integration
 - Memory management (save, retrieve, search)
